@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 const isWindowsMock = require('../is-windows')
 const commandConvert = require('../command')
 
@@ -59,7 +60,7 @@ test(`leaves embedded variables unchanged when using correct operating system`, 
 
 test(`converts braced unix-style env variable usage for windows`, () => {
   isWindowsMock.mockReturnValue(true)
-  // eslint-disable-next-line no-template-curly-in-string
+
   expect(commandConvert('${test}', env)).toBe('%test%')
 })
 
@@ -78,4 +79,54 @@ test(`normalizes command on windows`, () => {
   // index.js calls `commandConvert` with `normalize` param
   // as `true` for command only
   expect(commandConvert('./cmd.bat', env, true)).toBe('cmd.bat')
+})
+
+test(`evaluates default values for missing environment variables on windows`, () => {
+  isWindowsMock.mockReturnValue(true)
+  expect(commandConvert('$test1/${foo:-bar}/$test2', env)).toBe(
+    '%test1%/bar/%test2%',
+  )
+})
+
+test(`evaluates default values for empty environment variables on windows`, () => {
+  isWindowsMock.mockReturnValue(true)
+  expect(commandConvert('$test1/${empty_var:-bang}/$test2', env)).toBe(
+    '%test1%/bang/%test2%',
+  )
+})
+
+test(`evaluates default values recursively for empty environment variables on windows`, () => {
+  isWindowsMock.mockReturnValue(true)
+  expect(
+    commandConvert('$test1/${empty_var:-${missing_var:-bang}}/$test2', env),
+  ).toBe('%test1%/bang/%test2%')
+})
+
+test(`evaluates secondary values recursively for environment variables on windows`, () => {
+  isWindowsMock.mockReturnValue(true)
+  expect(
+    commandConvert('$test1/${empty_var:-${test3:-bang}}/$test2', env),
+  ).toBe('%test1%/%test3%/%test2%')
+})
+
+test('resolves the current working directory inside string in windows', () => {
+  isWindowsMock.mockReturnValue(true)
+  expect(commandConvert('cd ${PWD}\\ADirectory')).toBe(
+    `cd ${process.cwd()}\\ADirectory`,
+  )
+})
+
+test('resolves the current working directory inside string in UNIX', () => {
+  isWindowsMock.mockReturnValue(false)
+  expect(commandConvert('cd ${PWD}/adir')).toBe('cd ${PWD}/adir')
+})
+
+test('All the escapes are belong to us in Windows', () => {
+  isWindowsMock.mockReturnValue(true)
+  expect(
+    commandConvert(
+      'start-\\${ESCAPED:-a-\\}-val}-\\$ESCAPED-\\\\${ESCAPED:-a-\\}-val}-\\\\$test1-end',
+      env,
+    ),
+  ).toBe('start-${ESCAPED:-a-\\}-val}-$ESCAPED-\\a-}-val-\\%test1%-end')
 })

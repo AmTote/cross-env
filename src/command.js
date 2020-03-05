@@ -1,5 +1,6 @@
 const path = require('path')
 const isWindows = require('./is-windows')
+const envReplace = require('./env-replace')
 
 module.exports = commandConvert
 
@@ -15,15 +16,7 @@ function commandConvert(command, env, normalize = false) {
   if (!isWindows()) {
     return command
   }
-  const envUnixRegex = /\$(\w+)|\${(\w+)}/g // $my_var or ${my_var}
-  const convertedCmd = command.replace(envUnixRegex, (match, $1, $2) => {
-    const varName = $1 || $2
-    // In Windows, non-existent variables are not replaced by the shell,
-    // so for example "echo %FOO%" will literally print the string "%FOO%", as
-    // opposed to printing an empty string in UNIX. See kentcdodds/cross-env#145
-    // If the env variable isn't defined at runtime, just strip it from the command entirely
-    return env[varName] ? `%${varName}%` : ''
-  })
+  const convertedCmd = envReplace(command, env, true)
   // Normalization is required for commands with relative paths
   // For example, `./cmd.bat`. See kentcdodds/cross-env#127
   // However, it should not be done for command arguments.

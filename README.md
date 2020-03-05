@@ -42,6 +42,7 @@ of setting it properly.
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Default Values](#default-values)
 - [`cross-env` vs `cross-env-shell`](#cross-env-vs-cross-env-shell)
 - [Windows Issues](#windows-issues)
 - [Inspiration](#inspiration)
@@ -126,6 +127,43 @@ Pay special attention to the **triple backslash** `(\\\)` **before** the
 **double quotes** `(")` and the **absence** of **single quotes** `(')`. Both of
 these conditions have to be met in order to work both on Windows and UNIX.
 
+Note: `${PWD}` and `$PWD` substitute for the current working directory.
+
+## Default Values
+
+To reference an environment variable and provide a default value if that
+variable is empty or not-defined, use the syntax:
+
+```bash
+${ENV_VAR_NAME:-default value}
+```
+
+Also supports recursive replacement in the default value allowing you to test
+multiple environment variables before showing a default
+
+```bash
+# Value of FIRST_VAR_TO_TEST or SECOND_VAR_TO_TEST environment variable if blank or undefined.
+# If both are blank or undefined, replace with an empty string
+${FIRST_VAR_TO_TEST:-$SECOND_VAR_TO_TEST}
+```
+
+Can nest as many as you want
+
+```bash
+# Value of FIRST_VAR_TO_TEST, then SECOND_VAR_TO_TEST then THIRD_VAR_TO_TEST environment variables.
+# If all are blank or undefined, the string "default value if all are empty or undefined"
+${FIRST_VAR_TO_TEST:-${SECOND_VAR_TO_TEST:-${THIRD_VAR_TO_TEST:-default value if all are empty or undefined}}}
+```
+
+Or even use multiple environment variables in the default values
+
+```bash
+${NODE_DEBUG_OPTIONS:---inspect=$NODE_DEBUG_PORT $NODE_DEFAULT_OPTIONS}
+```
+
+This follows the UNIX standard for environment variables and works for both
+`cross-env` and `cross-env-shell`.
+
 ## `cross-env` vs `cross-env-shell`
 
 The `cross-env` module exposes two bins: `cross-env` and `cross-env-shell`. The
@@ -173,8 +211,6 @@ easier for Windows users.
 
 - [`env-cmd`](https://github.com/toddbluhm/env-cmd) - Reads environment
   variables from a file instead
-- [`@naholyr/cross-env`](https://www.npmjs.com/package/@naholyr/cross-env) -
-  `cross-env` with support for setting default values
 
 ## Contributors
 
@@ -208,6 +244,7 @@ Thanks goes to these people ([emoji key][emojis]):
     <td align="center"><a href="https://nz.linkedin.com/in/jsonc11"><img src="https://avatars0.githubusercontent.com/u/5185660?v=4" width="100px;" alt="Jason Cooke"/><br /><sub><b>Jason Cooke</b></sub></a><br /><a href="https://github.com/kentcdodds/cross-env/commits?author=Jason-Cooke" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/bibo5088"><img src="https://avatars0.githubusercontent.com/u/17709887?v=4" width="100px;" alt="bibo5088"/><br /><sub><b>bibo5088</b></sub></a><br /><a href="https://github.com/kentcdodds/cross-env/commits?author=bibo5088" title="Code">💻</a></td>
     <td align="center"><a href="https://codefund.io"><img src="https://avatars2.githubusercontent.com/u/12481?v=4" width="100px;" alt="Eric Berry"/><br /><sub><b>Eric Berry</b></sub></a><br /><a href="#fundingFinding-coderberry" title="Funding Finding">🔍</a></td>
+    <td align="center"><a href="https://github.com/yinzara"><img src="https://avatars2.githubusercontent.com/u/671855?v=4" width="100px;" alt="Matt Morrissette"/><br /><sub><b>Matt Morrissette</b></sub></a><br /><a href="https://github.com/kentcdodds/cross-env/commits?author=yinzara" title="Code">💻</a><a href="https://github.com/kentcdodds/cross-env/commits?author=yinzara" title="Documentation">📖</a><a href="https://github.com/kentcdodds/cross-env/commits?author=yinzara" title="Tests">⚠️</a></td> 
   </tr>
 </table>
 
