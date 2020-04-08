@@ -36,7 +36,7 @@
   "author": "Kent C. Dodds <me@kentcdodds.com> (https://kentcdodds.com)",
   "license": "MIT",
   "dependencies": {
-    "cross-spawn": "^7.0.1"
+    "cross-spawn": "^7.0.2"
   },
   "devDependencies": {
     "kcd-scripts": "^5.2.0"
